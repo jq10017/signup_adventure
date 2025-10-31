@@ -19,7 +19,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
   void initState() {
     super.initState();
     _confettiController =
-        ConfettiController(duration: const Duration(seconds: 10));
+        ConfettiController(duration: const Duration(seconds: 5));
     _confettiController.play();
   }
 
@@ -48,6 +48,8 @@ class _SuccessScreenState extends State<SuccessScreen> {
                 Colors.blue,
                 Colors.green,
                 Colors.orange,
+                Colors.pink,
+                Colors.red,
               ],
             ),
           ),
