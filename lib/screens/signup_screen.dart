@@ -3,6 +3,7 @@ import 'success_screen.dart'; // Import for navigation
 
 String _selectedAvatar = '🙂'; // default avatar
 final List<String> _avatars = ['😎', '🚀', '🐉', '🌈', '🦸‍♂️'];
+
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -16,63 +17,100 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
+
   bool _isPasswordVisible = false;
   bool _isLoading = false;
+
   double _passwordStrength = 0;
   String _passwordFeedback = '';
   Color _strengthColor = Colors.red;
+
   List<String> _achievements = [];
+  double _progress = 0.0;
+  String _progressMessage = '';
 
-  void _checkPasswordStrength(String password) {
-  double strength = 0;
+  // Update progress bar based on completed fields
+  void _updateProgress() {
+    int completed = 0;
+    if (_nameController.text.isNotEmpty) completed++;
+    if (_emailController.text.isNotEmpty) completed++;
+    if (_dobController.text.isNotEmpty) completed++;
+    if (_passwordController.text.isNotEmpty) completed++;
 
-  if (password.isEmpty) {
+    double progress = completed / 4;
+
+    String message;
+    if (progress == 0.25) {
+      message = 'Nice start! Keep going! 💪';
+    } else if (progress == 0.5) {
+      message = 'Halfway there! 🔥';
+    } else if (progress == 0.75) {
+      message = 'Almost done! 🌟';
+    } else if (progress == 1.0) {
+      message = 'All set! Ready for adventure! 🎉';
+    } else {
+      message = '';
+    }
+
     setState(() {
-      _passwordStrength = 0;
-      _passwordFeedback = '';
-      _strengthColor = Colors.red;
+      _progress = progress;
+      _progressMessage = message;
     });
-    return;
   }
 
-  // Basic strength logic
-  if (password.length >= 6) strength += 0.25;
-  if (password.contains(RegExp(r'[A-Z]'))) strength += 0.25;
-  if (password.contains(RegExp(r'[0-9]'))) strength += 0.25;
-  if (password.contains(RegExp(r'[!@#\$&*~]'))) strength += 0.25;
-  if (strength > 0.75 && !_achievements.contains('Strong Password Master')) {
-  setState(() {
-    _achievements.add('Strong Password Master');
-  });
-}
-  if (_nameController.text.length > 10 && !_achievements.contains('Creative Name Hero')) {
-  setState(() {
-     _achievements.add('Creative Name Hero');
-  });
+  // Check password strength and assign achievements
+  void _checkPasswordStrength(String password) {
+    double strength = 0;
+
+    if (password.isEmpty) {
+      setState(() {
+        _passwordStrength = 0;
+        _passwordFeedback = '';
+        _strengthColor = Colors.red;
+      });
+      return;
+    }
+
+    // Basic strength logic
+    if (password.length >= 6) strength += 0.25;
+    if (password.contains(RegExp(r'[A-Z]'))) strength += 0.25;
+    if (password.contains(RegExp(r'[0-9]'))) strength += 0.25;
+    if (password.contains(RegExp(r'[!@#\$&*~]'))) strength += 0.25;
+
+    // Achievements
+    if (strength > 0.75 && !_achievements.contains('Strong Password Master')) {
+      _achievements.add('Strong Password Master');
+    }
+    if (_nameController.text.length > 10 &&
+        !_achievements.contains('Creative Name Hero')) {
+      _achievements.add('Creative Name Hero');
+    }
+
+    Color color;
+    String feedback;
+    if (strength <= 0.25) {
+      color = Colors.red;
+      feedback = 'Weak';
+    } else if (strength <= 0.5) {
+      color = Colors.orange;
+      feedback = 'Fair';
+    } else if (strength <= 0.75) {
+      color = Colors.yellow[700]!;
+      feedback = 'Good';
+    } else {
+      color = Colors.green;
+      feedback = 'Strong';
+    }
+
+    setState(() {
+      _passwordStrength = strength;
+      _passwordFeedback = feedback;
+      _strengthColor = color;
+    });
+
+    _updateProgress();
   }
 
-  Color color;
-  String feedback;
-  if (strength <= 0.25) {
-    color = Colors.red;
-    feedback = 'Weak';
-  } else if (strength <= 0.5) {
-    color = Colors.orange;
-    feedback = 'Fair';
-  } else if (strength <= 0.75) {
-    color = Colors.yellow[700]!;
-    feedback = 'Good';
-  } else {
-    color = Colors.green;
-    feedback = 'Strong';
-  }
-
-  setState(() {
-    _passwordStrength = strength;
-    _passwordFeedback = feedback;
-    _strengthColor = color;
-  });
-}
   @override
   void dispose() {
     _nameController.dispose();
@@ -82,7 +120,7 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  // Date Picker Function
+  // Date picker
   Future<void> _selectDate() async {
     DateTime? picked = await showDatePicker(
       context: context,
@@ -91,9 +129,8 @@ class _SignupScreenState extends State<SignupScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null) {
-      setState(() {
-        _dobController.text = "${picked.day}/${picked.month}/${picked.year}";
-      });
+      _dobController.text = "${picked.day}/${picked.month}/${picked.year}";
+      _updateProgress();
     }
   }
 
@@ -103,7 +140,6 @@ class _SignupScreenState extends State<SignupScreen> {
         _isLoading = true;
       });
 
-      // Simulate API call
       Future.delayed(const Duration(seconds: 2), () {
         if (!mounted) return;
         setState(() {
@@ -113,7 +149,11 @@ class _SignupScreenState extends State<SignupScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => SuccessScreen(userName: _nameController.text, avatar: _selectedAvatar, achievements: _achievements),
+            builder: (context) => SuccessScreen(
+              userName: _nameController.text,
+              avatar: _selectedAvatar,
+              achievements: _achievements,
+            ),
           ),
         );
       });
@@ -135,7 +175,7 @@ class _SignupScreenState extends State<SignupScreen> {
             key: _formKey,
             child: Column(
               children: [
-                // Animated Form Header
+                // Header
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.easeInOut,
@@ -163,6 +203,25 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 30),
 
+                // Progress Tracker
+                LinearProgressIndicator(
+                  value: _progress,
+                  minHeight: 10,
+                  backgroundColor: Colors.red[100],
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Color.lerp(Colors.red, Colors.green, _progress)!,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _progressMessage,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color.lerp(Colors.red, Colors.green, _progress),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
                 // Name Field
                 _buildTextField(
                   controller: _nameController,
@@ -174,6 +233,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     }
                     return null;
                   },
+                  onChanged: (_) => _updateProgress(),
                 ),
                 const SizedBox(height: 20),
 
@@ -191,6 +251,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     }
                     return null;
                   },
+                  onChanged: (_) => _updateProgress(),
                 ),
                 const SizedBox(height: 20),
 
@@ -258,70 +319,72 @@ class _SignupScreenState extends State<SignupScreen> {
                     }
                     return null;
                   },
-                  onChanged: _checkPasswordStrength
+                  onChanged: _checkPasswordStrength,
+                ),
+                const SizedBox(height: 20),
+
+                // Password Strength
+                LinearProgressIndicator(
+                  value: _passwordStrength,
+                  minHeight: 8,
+                  backgroundColor: Colors.grey[300],
+                  color: _strengthColor,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _passwordFeedback,
+                  style: TextStyle(
+                    color: _strengthColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Avatar Picker
+                const Text(
+                  'Choose Your Adventure Avatar:',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 12,
+                  children: _avatars.map((emoji) {
+                    final bool isSelected = _selectedAvatar == emoji;
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedAvatar = emoji;
+                          if (_selectedAvatar == '🐉' &&
+                              !_achievements.contains('Dragon Master')) {
+                            _achievements.add('Dragon Master');
+                          }
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.deepPurple[100] : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected ? Colors.deepPurple : Colors.grey.shade300,
+                            width: 2,
+                          ),
+                        ),
+                        child: Text(
+                          emoji,
+                          style: const TextStyle(fontSize: 32),
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
                 const SizedBox(height: 30),
 
-                LinearProgressIndicator(
-                value: _passwordStrength,
-                 minHeight: 8,
-                backgroundColor: Colors.grey[300],
-                 color: _strengthColor,
-                 borderRadius: BorderRadius.circular(5),
-                ),
-const SizedBox(height: 8),
-Text(
-  _passwordFeedback,
-  style: TextStyle(
-    color: _strengthColor,
-    fontWeight: FontWeight.bold,
-  ),
-),
-const SizedBox(height: 20),
-                // Avatar Picker
-const Text(
-  'Choose Your Adventure Avatar:',
-  style: TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.bold,
-    color: Colors.deepPurple,
-  ),
-),
-const SizedBox(height: 10),
-
-Wrap(
-  spacing: 12,
-  children: _avatars.map((emoji) {
-    final bool isSelected = _selectedAvatar == emoji;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedAvatar = emoji;
-          if (_selectedAvatar == '🐉' && !_achievements.contains('Dragon Master')) {
-            _achievements.add('Dragon Master');
-          }
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.deepPurple[100] : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? Colors.deepPurple : Colors.grey.shade300,
-            width: 2,
-          ),
-        ),
-        child: Text(
-          emoji,
-          style: const TextStyle(fontSize: 32),
-        ),
-      ),
-    );
-  }).toList(),
-),
-const SizedBox(height: 30),
                 // Submit Button
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
@@ -330,8 +393,7 @@ const SizedBox(height: 30),
                   child: _isLoading
                       ? const Center(
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.deepPurple),
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
                           ),
                         )
                       : ElevatedButton(
@@ -349,8 +411,7 @@ const SizedBox(height: 30),
                             children: [
                               Text(
                                 'Start My Adventure',
-                                style: TextStyle(
-                                    fontSize: 18, color: Colors.white),
+                                style: TextStyle(fontSize: 18, color: Colors.white),
                               ),
                               SizedBox(width: 10),
                               Icon(Icons.rocket_launch, color: Colors.white),
@@ -366,12 +427,13 @@ const SizedBox(height: 30),
     );
   }
 
-
+  // Helper for standard text fields
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
     required IconData icon,
     required String? Function(String?) validator,
+    void Function(String)? onChanged,
   }) {
     return TextFormField(
       controller: controller,
@@ -385,6 +447,7 @@ const SizedBox(height: 30),
         fillColor: Colors.grey[50],
       ),
       validator: validator,
+      onChanged: onChanged,
     );
   }
 }
