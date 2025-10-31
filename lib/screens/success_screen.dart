@@ -5,8 +5,8 @@ import 'package:confetti/confetti.dart';
 class SuccessScreen extends StatefulWidget {
   final String userName;
   final String avatar;
-
-  const SuccessScreen({super.key, required this.userName, required this.avatar});
+  final List<String> achievements;
+  const SuccessScreen({super.key, required this.userName, required this.avatar, this.achievements = const []});
 
   @override
   State<SuccessScreen> createState() => _SuccessScreenState();
@@ -52,7 +52,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
             ),
           ),
 
-          // Tha Content
+          // The Content
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
@@ -110,6 +110,28 @@ class _SuccessScreenState extends State<SuccessScreen> {
                     'Your adventure begins now!',
                     style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
+                if (widget.achievements.isNotEmpty) ...[
+  const SizedBox(height: 20),
+  const Text(
+    '🏅 Achievements Unlocked:',
+    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  ),
+  const SizedBox(height: 10),
+  Wrap(
+    spacing: 8,
+    runSpacing: 8,
+    children: widget.achievements.map((achievement) {
+      return Chip(
+        label: Text(
+          achievement,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.deepPurple,
+        avatar: const Icon(Icons.star, color: Colors.yellow),
+      );
+    }).toList(),
+  ),
+],
 
                   const SizedBox(height: 50),
 

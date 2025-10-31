@@ -40,8 +40,17 @@ class _SignupScreenState extends State<SignupScreen> {
   if (password.contains(RegExp(r'[A-Z]'))) strength += 0.25;
   if (password.contains(RegExp(r'[0-9]'))) strength += 0.25;
   if (password.contains(RegExp(r'[!@#\$&*~]'))) strength += 0.25;
+  if (strength > 0.75 && !_achievements.contains('Strong Password Master')) {
+  setState(() {
+    _achievements.add('Strong Password Master');
+  });
+}
+  if (_nameController.text.length > 10 && !_achievements.contains('Creative Name Hero')) {
+  setState(() {
+     _achievements.add('Creative Name Hero');
+  });
+  }
 
-  
   Color color;
   String feedback;
   if (strength <= 0.25) {
@@ -104,7 +113,7 @@ class _SignupScreenState extends State<SignupScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => SuccessScreen(userName: _nameController.text, avatar: _selectedAvatar),
+            builder: (context) => SuccessScreen(userName: _nameController.text, avatar: _selectedAvatar, achievements: _achievements),
           ),
         );
       });
@@ -288,6 +297,9 @@ Wrap(
       onTap: () {
         setState(() {
           _selectedAvatar = emoji;
+          if (_selectedAvatar == '🐉' && !_achievements.contains('Dragon Master')) {
+            _achievements.add('Dragon Master');
+          }
         });
       },
       child: AnimatedContainer(
