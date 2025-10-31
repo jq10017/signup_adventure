@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'success_screen.dart'; // Import for navigation
 
+String _selectedAvatar = '🙂'; // default avatar
+final List<String> _avatars = ['😎', '🚀', '🐉', '🌈', '🦸‍♂️'];
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -57,7 +59,7 @@ class _SignupScreenState extends State<SignupScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => SuccessScreen(userName: _nameController.text),
+            builder: (context) => SuccessScreen(userName: _nameController.text, avatar: _selectedAvatar),
           ),
         );
       });
@@ -204,7 +206,47 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                 ),
                 const SizedBox(height: 30),
+                // Avatar Picker
+const Text(
+  'Choose Your Adventure Avatar:',
+  style: TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: Colors.deepPurple,
+  ),
+),
+const SizedBox(height: 10),
 
+Wrap(
+  spacing: 12,
+  children: _avatars.map((emoji) {
+    final bool isSelected = _selectedAvatar == emoji;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedAvatar = emoji;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.deepPurple[100] : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? Colors.deepPurple : Colors.grey.shade300,
+            width: 2,
+          ),
+        ),
+        child: Text(
+          emoji,
+          style: const TextStyle(fontSize: 32),
+        ),
+      ),
+    );
+  }).toList(),
+),
+const SizedBox(height: 30),
                 // Submit Button
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
