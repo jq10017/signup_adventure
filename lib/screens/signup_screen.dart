@@ -18,7 +18,52 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _dobController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _isLoading = false;
+  double _passwordStrength = 0;
+  String _passwordFeedback = '';
+  Color _strengthColor = Colors.red;
+  List<String> _achievements = [];
 
+  void _checkPasswordStrength(String password) {
+  double strength = 0;
+
+  if (password.isEmpty) {
+    setState(() {
+      _passwordStrength = 0;
+      _passwordFeedback = '';
+      _strengthColor = Colors.red;
+    });
+    return;
+  }
+
+  // Basic strength logic
+  if (password.length >= 6) strength += 0.25;
+  if (password.contains(RegExp(r'[A-Z]'))) strength += 0.25;
+  if (password.contains(RegExp(r'[0-9]'))) strength += 0.25;
+  if (password.contains(RegExp(r'[!@#\$&*~]'))) strength += 0.25;
+
+  
+  Color color;
+  String feedback;
+  if (strength <= 0.25) {
+    color = Colors.red;
+    feedback = 'Weak';
+  } else if (strength <= 0.5) {
+    color = Colors.orange;
+    feedback = 'Fair';
+  } else if (strength <= 0.75) {
+    color = Colors.yellow[700]!;
+    feedback = 'Good';
+  } else {
+    color = Colors.green;
+    feedback = 'Strong';
+  }
+
+  setState(() {
+    _passwordStrength = strength;
+    _passwordFeedback = feedback;
+    _strengthColor = color;
+  });
+}
   @override
   void dispose() {
     _nameController.dispose();
@@ -204,8 +249,26 @@ class _SignupScreenState extends State<SignupScreen> {
                     }
                     return null;
                   },
+                  onChanged: _checkPasswordStrength
                 ),
                 const SizedBox(height: 30),
+
+                LinearProgressIndicator(
+                value: _passwordStrength,
+                 minHeight: 8,
+                backgroundColor: Colors.grey[300],
+                 color: _strengthColor,
+                 borderRadius: BorderRadius.circular(5),
+                ),
+const SizedBox(height: 8),
+Text(
+  _passwordFeedback,
+  style: TextStyle(
+    color: _strengthColor,
+    fontWeight: FontWeight.bold,
+  ),
+),
+const SizedBox(height: 20),
                 // Avatar Picker
 const Text(
   'Choose Your Adventure Avatar:',
