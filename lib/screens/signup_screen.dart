@@ -40,28 +40,31 @@ class _SignupScreenState extends State<SignupScreen> {
       });
     }
   }
-  
+
   void _submitForm() {
-        if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
       // Simulate API call
       Future.delayed(const Duration(seconds: 2), () {
-        if (!mounted) return; // Check if the widget is still in the tree
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SuccessScreen(userName: _nameController.text),
-      ),
-    );
-    });
-    @override
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SuccessScreen(userName: _nameController.text),
+          ),
+        );
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -135,7 +138,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // DOB w/Calendar
+                // DOB Field
                 TextFormField(
                   controller: _dobController,
                   readOnly: true,
@@ -163,7 +166,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Pswd Field w/ Toggle
+                // Password Field
                 TextFormField(
                   controller: _passwordController,
                   obscureText: !_isPasswordVisible,
@@ -202,7 +205,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 30),
 
-                // Submit Button w/ Loading Animation
+                // Submit Button
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   width: _isLoading ? 60 : double.infinity,
@@ -246,6 +249,7 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -266,7 +270,4 @@ class _SignupScreenState extends State<SignupScreen> {
       validator: validator,
     );
   }
-}
- }
-
 }
